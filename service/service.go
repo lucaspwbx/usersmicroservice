@@ -10,17 +10,11 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
+	"github.com/lucasweiblen/usersmicroservice/models"
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type User struct {
-	Id   int
-	Name string
-	Age  int
-}
-
-type UserService struct {
-}
+type UserService struct{}
 
 type UserResource struct {
 	db gorm.DB
@@ -31,8 +25,8 @@ func (s *UserService) getDb() (gorm.DB, error) {
 	if err != nil {
 		return db, errors.New("Error opening DB")
 	}
-	db.DropTableIfExists(User{})
-	db.CreateTable(User{})
+	db.DropTableIfExists(models.User{})
+	db.CreateTable(models.User{})
 	return db, err
 }
 
@@ -56,7 +50,7 @@ func (s *UserService) Run() {
 }
 
 func (ur *UserResource) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
-	var user User
+	var user models.User
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		http.Error(w, "Error decoding JSON", http.StatusBadRequest)
@@ -69,7 +63,7 @@ func (ur *UserResource) CreateUserHandler(w http.ResponseWriter, r *http.Request
 }
 
 func (ur *UserResource) GetUserHandler(w http.ResponseWriter, r *http.Request) {
-	var user User
+	var user models.User
 	params := mux.Vars(r)
 	id, _ := strconv.Atoi(params["id"])
 
@@ -83,8 +77,7 @@ func (ur *UserResource) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ur *UserResource) GetUsersHandler(w http.ResponseWriter, r *http.Request) {
-	//users := []User{User{1, "Lucas", 29}, User{2, "Majoe", 30}}
-	var users []User
+	var users []models.User
 
 	ur.db.Find(&users)
 	data, err := json.Marshal(users)
@@ -95,7 +88,7 @@ func (ur *UserResource) GetUsersHandler(w http.ResponseWriter, r *http.Request) 
 }
 
 func (ur *UserResource) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
-	var user User
+	var user models.User
 
 	params := mux.Vars(r)
 	id, _ := strconv.Atoi(params["id"])
@@ -107,7 +100,7 @@ func (ur *UserResource) DeleteUserHandler(w http.ResponseWriter, r *http.Request
 }
 
 func (ur *UserResource) UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
-	var user, newUser User
+	var user, newUser models.User
 
 	err := json.NewDecoder(r.Body).Decode(&newUser)
 	if err != nil {

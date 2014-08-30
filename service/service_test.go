@@ -66,3 +66,25 @@ func TestUpdateUser(t *testing.T) {
 
 	assert.Equal(t, res.Code, 204)
 }
+
+func TestGetUsers(t *testing.T) {
+	req, err := http.NewRequest("GET", "/users", nil)
+	assert.Equal(t, err, nil)
+
+	res := httptest.NewRecorder()
+	GetUsersHandler(res, req)
+
+	assert.Equal(t, res.Code, 200)
+
+	var users []User
+	err = json.NewDecoder(res.Body).Decode(&users)
+	for _, v := range users {
+		assertUser(t, v)
+	}
+}
+
+func assertUser(t *testing.T, user User) {
+	assert.NotEqual(t, user.Id, nil)
+	assert.NotEqual(t, user.Name, nil)
+	assert.NotEqual(t, user.Age, nil)
+}

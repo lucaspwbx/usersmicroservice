@@ -12,6 +12,9 @@ type User struct {
 	Age  int
 }
 
+type UserService struct {
+}
+
 func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	var user User
 	err := json.NewDecoder(r.Body).Decode(&user)
@@ -31,7 +34,16 @@ func GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Errorf("Error encoding JSON")
 	}
+	w.Write(data)
+}
 
+func GetUsersHandler(w http.ResponseWriter, r *http.Request) {
+	users := []User{User{1, "Lucas", 29}, User{2, "Majoe", 30}}
+
+	data, err := json.Marshal(users)
+	if err != nil {
+		fmt.Errorf("Error encoding JSON")
+	}
 	w.Write(data)
 }
 

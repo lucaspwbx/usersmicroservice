@@ -2,8 +2,13 @@ package service
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+
+	"github.com/gorilla/mux"
+	"github.com/jinzhu/gorm"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type User struct {
@@ -13,6 +18,37 @@ type User struct {
 }
 
 type UserService struct {
+}
+
+type UserResource struct {
+	db gorm.DB
+}
+
+func (s *UserService) getDb() (gorm.DB, error) {
+	db, err := gorm.Open("sqlite3", "/tmp/users.db")
+	if err != nil {
+		return db, errors.New("Error opening DB")
+	}
+	return db, err
+}
+
+func (s *UserService) Run() {
+	//db, err := s.getDb()
+	//if err != nil {
+	//log.Println("Error getting database")
+	//return
+	//}
+
+	//resource := &UserResource{db: db}
+
+	r := mux.NewRouter()
+	r.HandleFunc("/users", GetUsersHandler).Methods("GET")
+	r.HandleFunc("/users", CreateUserHandler).Methods("POST")
+	r.HandleFunc("/users/{id}", GetUserHandler).Methods("GET")
+	r.HandleFunc("/users/{id}", DeleteUserHandler).Methods("DELETE")
+	r.HandleFunc("/users/{id}", UpdateUserHandler).Methods("PUT")
+	http.Handle("/", r)
+	http.ListenAndServe(":8080", r)
 }
 
 func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
